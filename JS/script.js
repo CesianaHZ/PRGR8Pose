@@ -9,11 +9,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
 const demosSection = document.getElementById("demos");
 let handLandmarker = undefined;
 let runningMode = "IMAGE";
 let enableWebcamButton;
 let webcamRunning = false;
+let allPoseData = [];
 // Before we can use HandLandmarker class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment to
 // get everything needed to run.
@@ -86,6 +88,7 @@ async function handleClick(event) {
             lineWidth: 5
         });
         drawLandmarks(cxt, landmarks, { color: "#FF0000", lineWidth: 1 });
+
     }
 }
 /********************************************************************
@@ -152,11 +155,13 @@ async function predictWebcam() {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     if (results.landmarks) {
         for (const landmarks of results.landmarks) {
+            console.log(landmarks);
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
                 color: "#00FF00",
                 lineWidth: 1
             });
             drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 1 });
+            classifyHandPose(landmarks, "Example Pose Label");
         }
     }
     canvasCtx.restore();
@@ -164,4 +169,53 @@ async function predictWebcam() {
     if (webcamRunning === true) {
         window.requestAnimationFrame(predictWebcam);
     }
+
+    function formatHandPoseData(landmarks, label) {
+        const poseData = {
+            pose: landmarks.flat(), // Flatten the landmarks array
+            label: label
+        };
+        return poseData;
+    }
+
+    function saveAllPoseData() {
+        saveToJsonFile(allPoseData, 'all_hand_poses.json');
+        // Clear the array after saving
+        allPoseData = [];
+    }
+
+
+    function saveToJsonFile(data, filename) {
+        const jsonData = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+        console.log(`Data saved to ${filename}`);
+    }
+
+    const poseClassificationDelay = 2000
+
+
+    function classifyHandPose(landmarks, label) {
+        const formattedData = formatHandPoseData(landmarks, label);
+        // Add formatted data to the array
+        allPoseData.push(formattedData);
+
+        // Check if you want to save the data when a certain condition is met,
+        // for example, after collecting a certain number of samples or after a certain time period.
+        // Here, we save the data every 50 samples.
+    }
+    canvasCtx.addEventListener('click', () => {
+        if (allPoseData.length > 0) {
+            saveAllPoseData();
+        }
+    });
 }

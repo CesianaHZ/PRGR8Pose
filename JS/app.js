@@ -1,4 +1,4 @@
-import kNear from "./knear";
+import kNear from "./knear.js";
 
 const k = 3;
 
