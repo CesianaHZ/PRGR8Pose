@@ -121,6 +121,7 @@ function enableCam(event) {
     else {
         webcamRunning = true;
         enableWebcamButton.innerText = "DISABLE PREDICTIONS";
+        allPoseData = [];
     }
     // getUsermedia parameters.
     const constraints = {
@@ -179,14 +180,18 @@ async function predictWebcam() {
     }
 
     function saveAllPoseData() {
+        // Stop getting data.
+        enableWebcamButton.click();
+
         saveToJsonFile(allPoseData, 'all_hand_poses.json');
+
         // Clear the array after saving
         allPoseData = [];
     }
 
 
     function saveToJsonFile(data, filename) {
-        const jsonData = JSON.stringify(data, null, 2);
+        const jsonData = JSON.stringify(convertData(data), null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
@@ -213,9 +218,31 @@ async function predictWebcam() {
         // for example, after collecting a certain number of samples or after a certain time period.
         // Here, we save the data every 50 samples.
     }
-    canvasCtx.addEventListener('click', () => {
-        if (allPoseData.length > 0) {
-            saveAllPoseData();
-        }
-    });
+
+    if (allPoseData.length > 50) {
+        saveAllPoseData();
+    }
+
+    function convertData() {
+        let convertedData = []
+        let poseData = {}
+        let poseDataArray = []
+
+        for (var i = 0; i < allPoseData.length; i++) {
+            poseData = {}
+            poseDataArray = []
+            for (var j = 0; j < allPoseData[i].pose.length; j++) {
+                poseDataArray.push(allPoseData[i].pose[j].x);
+                poseDataArray.push(allPoseData[i].pose[j].y);
+                poseDataArray.push(allPoseData[i].pose[j].z);
+            };
+            poseData = {
+                pose: poseDataArray,
+                label: allPoseData[i].label
+            };
+            convertedData.push(poseData);
+        };
+
+        return convertedData;
+    }
 }
