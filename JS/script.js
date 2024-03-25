@@ -162,7 +162,7 @@ async function predictWebcam() {
                 lineWidth: 1
             });
             drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 1 });
-            classifyHandPose(landmarks, "Example Pose Label");
+            classifyHandPose(landmarks, "L");
         }
     }
     canvasCtx.restore();
