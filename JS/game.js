@@ -7,6 +7,17 @@ let enableWebcamButton;
 let webcamRunning = false;
 let allPoseData = [];
 
+
+const nn = ml5.neuralNetwork({ task: 'classification', debug: true })
+
+const modelDetails = {
+    model: '../model/model.json',
+    metadata: '../model/model_meta.json',
+    weights: '../model/model.weights.bin'
+}
+nn.load(modelDetails, () => console.log("Model Loaded!"))
+
+
 const createHandLandmarker = async () => {
     const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
     handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -132,13 +143,12 @@ async function predictWebcam() {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     if (results.landmarks) {
         for (const landmarks of results.landmarks) {
-            console.log(landmarks);
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
                 color: "#00FF00",
                 lineWidth: 1
             });
             drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 1 });
-            classifyHandPose(landmarks, "L");
+            await classifyHandPose(landmarks);
         }
     }
     canvasCtx.restore();
@@ -147,70 +157,14 @@ async function predictWebcam() {
         window.requestAnimationFrame(predictWebcam);
     }
 
-    function formatHandPoseData(landmarks, label) {
-        const poseData = {
-            pose: landmarks.flat(), // Flatten the landmarks array
-            label: label
-        };
-        return poseData;
-    }
+    async function classifyHandPose(landmarks) {
+        console.log(landmarks);
+        let dataArray = [];
 
-    function saveAllPoseData() {
-        // Stop getting data.
-        enableWebcamButton.click();
+        for (let i in landmarks)
+            dataArray.push(landmarks[i].x, landmarks[i].y, landmarks[i].z);
 
-        saveToJsonFile(allPoseData, 'all_hand_poses.json');
-
-        allPoseData = [];
-    }
-
-
-    function saveToJsonFile(data, filename) {
-        const jsonData = JSON.stringify(convertData(data), null, 2);
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
-        console.log(`Data saved to ${filename}`);
-    }
-
-
-    function classifyHandPose(landmarks, label) {
-        const formattedData = formatHandPoseData(landmarks, label);
-        allPoseData.push(formattedData);
-    }
-
-    if (allPoseData.length > 50) {
-        saveAllPoseData();
-    }
-
-    function convertData() {
-        let convertedData = []
-        let poseData = {}
-        let poseDataArray = []
-
-        for (let i = 0; i < allPoseData.length; i++) {
-            poseData = {}
-            poseDataArray = []
-            for (let j = 0; j < allPoseData[i].pose.length; j++) {
-                poseDataArray.push(allPoseData[i].pose[j].x);
-                poseDataArray.push(allPoseData[i].pose[j].y);
-                poseDataArray.push(allPoseData[i].pose[j].z);
-            };
-            poseData = {
-                pose: poseDataArray,
-                label: allPoseData[i].label
-            };
-            convertedData.push(poseData);
-        };
-
-        return convertedData;
+        let result = await nn.classify(dataArray);
+        console.log(result[0].label);
     }
 }
