@@ -12,7 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-@use "@material";
 body {
     font-family: roboto;
     margin: 2em;
@@ -110,4 +109,57 @@ footer {
 
 .detectOnClick img {
     width: 100%;
+}
+
+.enemy {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: red;
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+#game-container {
+    position: relative;
+}
+
+#score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    z-index: 1;
+}
+
+#countdown {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    font-size: 420px;
+    color: pink;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 9999;
+}
+
+#countdownButton {
+    position: fixed;
+    top: 60%;
+    left: 60%;
+    transform: translate(-70%, -70%);
+    display: none;
+    z-index: 999;
 }

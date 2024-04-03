@@ -6,9 +6,13 @@ let runningMode = "IMAGE";
 let enableWebcamButton;
 let webcamRunning = false;
 let allPoseData = [];
+let lastVideoTime = -1;
+let results = undefined;
 
 const createHandLandmarker = async () => {
+
     const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+
     handLandmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
@@ -17,14 +21,14 @@ const createHandLandmarker = async () => {
         runningMode: runningMode,
         numHands: 2
     });
+
     demosSection.classList.remove("invisible");
 };
 createHandLandmarker();
 
 const imageContainers = document.getElementsByClassName("detectOnClick");
-// Now let's go through all of these and add a click event listener.
 for (let i = 0; i < imageContainers.length; i++) {
-    // Add event listener to the child element whichis the img element.
+
     imageContainers[i].children[0].addEventListener("click", handleClick);
 }
 
@@ -77,14 +81,17 @@ const canvasCtx = canvasElement.getContext("2d");
 const hasGetUserMedia = () => { var _a; return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia); };
 
 if (hasGetUserMedia()) {
+
     enableWebcamButton = document.getElementById("webcamButton");
     enableWebcamButton.addEventListener("click", enableCam);
 }
 else {
+
     console.warn("getUserMedia() is not supported by your browser");
 }
 
 function enableCam(event) {
+
     if (!handLandmarker) {
         console.log("Wait! objectDetector not loaded yet.");
         return;
@@ -108,12 +115,11 @@ function enableCam(event) {
         video.addEventListener("loadeddata", predictWebcam);
     });
 }
-let lastVideoTime = -1;
-let results = undefined;
+
 console.log(video);
 async function predictWebcam() {
+
     canvasElement.style.width = video.videoWidth;
-    ;
     canvasElement.style.height = video.videoHeight;
     canvasElement.width = video.videoWidth;
     canvasElement.height = video.videoHeight;
@@ -123,14 +129,20 @@ async function predictWebcam() {
         runningMode = "VIDEO";
         await handLandmarker.setOptions({ runningMode: "VIDEO"});
     }
+
     let startTimeMs = performance.now();
+
     if (lastVideoTime !== video.currentTime) {
         lastVideoTime = video.currentTime;
         results = handLandmarker.detectForVideo(video, startTimeMs);
     }
+
     canvasCtx.save();
+
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
     if (results.landmarks) {
+
         for (const landmarks of results.landmarks) {
             console.log(landmarks);
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
@@ -138,9 +150,10 @@ async function predictWebcam() {
                 lineWidth: 1
             });
             drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 1 });
-            classifyHandPose(landmarks, "L");
+            createHandPoseData(landmarks, "L");
         }
     }
+
     canvasCtx.restore();
 
     if (webcamRunning === true) {
@@ -148,15 +161,17 @@ async function predictWebcam() {
     }
 
     function formatHandPoseData(landmarks, label) {
+
         const poseData = {
-            pose: landmarks.flat(), // Flatten the landmarks array
+            pose: landmarks.flat(),
             label: label
         };
+
         return poseData;
     }
 
     function saveAllPoseData() {
-        // Stop getting data.
+
         enableWebcamButton.click();
 
         saveToJsonFile(allPoseData, 'all_hand_poses.json');
@@ -166,11 +181,13 @@ async function predictWebcam() {
 
 
     function saveToJsonFile(data, filename) {
+
         const jsonData = JSON.stringify(convertData(data), null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement('a');
+
         link.href = url;
         link.download = filename;
         document.body.appendChild(link);
@@ -182,7 +199,8 @@ async function predictWebcam() {
     }
 
 
-    function classifyHandPose(landmarks, label) {
+    function createHandPoseData(landmarks, label) {
+
         const formattedData = formatHandPoseData(landmarks, label);
         allPoseData.push(formattedData);
     }
@@ -192,6 +210,7 @@ async function predictWebcam() {
     }
 
     function convertData() {
+
         let convertedData = []
         let poseData = {}
         let poseDataArray = []
@@ -203,13 +222,14 @@ async function predictWebcam() {
                 poseDataArray.push(allPoseData[i].pose[j].x);
                 poseDataArray.push(allPoseData[i].pose[j].y);
                 poseDataArray.push(allPoseData[i].pose[j].z);
-            };
+            }
+
             poseData = {
                 pose: poseDataArray,
                 label: allPoseData[i].label
-            };
+            }
             convertedData.push(poseData);
-        };
+        }
 
         return convertedData;
     }

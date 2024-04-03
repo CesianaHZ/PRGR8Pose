@@ -10,15 +10,56 @@
 <body>
 <h1>Hand landmark for games</h1>
 
+
+<div id="rules">
+    <h2>
+        Destroy the blocks by making the corresponding hand gesture.
+    </h2>
+    <h2>
+        Blue = Metal
+    </H2>
+    <h2>
+        Red = Victory
+    </H2>
+    <h2>
+        Green = L
+    </H2>
+
+    <button id="countdownButton" class="mdc-button mdc-button--raised" style="display: none">Play</button>
+    <div id="countdown"></div>
+
+</div>
+
 <section id="demos" class="invisible">
     <div id="liveView" class="videoView">
         <button id="webcamButton" class="mdc-button mdc-button--raised">
             <span class="mdc-button__ripple"></span>
             <span class="mdc-button__label">ENABLE WEBCAM</span>
         </button>
-        <div style="position: relative;">
-            <video id="webcam" style="position: absolute" autoplay playsinline></video>
-            <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
+
+        <div id="game-container">
+            <div style="position: relative;">
+                <video id="webcam" style="position: absolute" autoplay playsinline></video>
+                <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
+            </div>
+
+            <div id="score">Score: 0</div>
         </div>
+
     </div>
+
+    <audio id="explosionSound">
+        <source src="../Audio/explosion.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+    <audio id="countdownSound">
+        <source src="../Audio/countdown.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+    <audio id="startSound">
+        <source src="../Audio/start.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
 </section>
