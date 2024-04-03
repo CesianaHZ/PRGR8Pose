@@ -13,23 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 body {
-    font-family: roboto;
+    font-family: roboto, sans-serif;
+    background-color: #000;
     margin: 2em;
-    color: #3d3d3d;
+    color: purple;
     --mdc-theme-primary: #007f8b;
     --mdc-theme-on-primary: #f1f3f4;
 }
 
-h1 {
-    color: #007f8b;
-}
-
-h2 {
-    clear: both;
-}
-
 em {
     font-weight: bold;
+}
+
+h1 {
+    margin-top: 50px;
+    border: black;
 }
 
 video {
@@ -162,4 +160,14 @@ footer {
     transform: translate(-70%, -70%);
     display: none;
     z-index: 999;
+
+    background-color: #007f8b;
+    color: #f1f3f4;
+    border-color: #007f8b;
+}
+
+#countdownButton:hover {
+    background-color: #0f0;
+    border-color: #0f0;
+    color: #000;
 }

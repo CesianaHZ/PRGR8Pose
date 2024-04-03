@@ -9,6 +9,9 @@ let allPoseData = [];
 let score = 0;
 let lastVideoTime = -1;
 let results = undefined;
+let squareCount = 0;
+let startTime = undefined;
+let spawnInterval = undefined;
 
 const imageContainers = document.getElementsByClassName("detectOnClick");
 const countdownButton = document.getElementById("countdownButton");
@@ -283,6 +286,11 @@ function animateEnemy(enemy) {
             clearInterval(interval);
             enemy.style.top = (window.innerHeight - 50) + 'px';
             enemy.style.left = (Math.random() * window.innerWidth) + 'px';
+
+            squareCount++;
+            if (checkGameEnd()) {
+                clearInterval(spawnInterval);
+            }
             return;
         }
 
@@ -300,15 +308,18 @@ function startSpawning() {
 
     spawnEnemy();
 
-    const nextSpawnTime = randomInterval(3000, 10000);
-
-    setTimeout(startSpawning, nextSpawnTime);
+    spawnInterval = setInterval(() => {
+        if (!checkGameEnd()) {
+            spawnEnemy();
+        }
+    }, randomInterval(3000, 10000));
 }
 
 
 
 function startCountdown() {
 
+    score = 0;
     countdownElement.style.display = "block";
 
     countdownAnimation(3);
@@ -342,4 +353,13 @@ function countdownAnimation(count) {
 
         }, 1000);
     }
+}
+
+function checkGameEnd() {
+    if (squareCount >= 10 || (Date.now() - startTime) >= 60000) {
+
+        countdownButton.style.display = "block";
+        return true;
+    }
+    return false;
 }
