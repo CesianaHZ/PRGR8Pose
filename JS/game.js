@@ -25,8 +25,19 @@ const modelDetails = {
     model: '../model/model.json',
     metadata: '../model/model_meta.json',
     weights: '../model/model.weights.bin'
+
 }
-nn.load(modelDetails, () => console.log("Model Loaded!"))
+
+await new Promise((resolve, reject) => {
+    nn.load(modelDetails, (err) => {
+        if (err) {
+            reject(err);
+        } else {
+            console.log("Model Loaded!");
+            resolve();
+        }
+    });
+});
 
 
 const createHandLandmarker = async () => {

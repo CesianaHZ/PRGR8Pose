@@ -3,7 +3,14 @@ import kNear from "./knear.js";
 const k = 3;
 
 const machine = new kNear(k);
-const nn = ml5.neuralNetwork({ task: 'classification', debug: true })
+const nn = ml5.neuralNetwork({ task: 'classification', debug: true,
+    layers: [
+        {
+            type: 'dense',
+            units: 14,
+            activation: 'relu',
+        }]});
+
 let filename;
 
 
@@ -55,7 +62,7 @@ async function trainer (data, label) {
 
 async function finishedTraining() {
 
-        nn.save("model", () => console.log("model was saved!"))
+    nn.save("model", () => console.log("model was saved!"))
 
     console.log("Finished training!");
 }
