@@ -1,6 +1,5 @@
 import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
-const demosSection = document.getElementById("demos");
 let handLandmarker = undefined;
 let runningMode = "IMAGE";
 let enableWebcamButton;
@@ -12,6 +11,7 @@ let results = undefined;
 let squareCount = 0;
 let startTime = undefined;
 let spawnInterval = undefined;
+let fetchUrl = 'http://localhost:8000/davePose';
 
 const imageContainers = document.getElementsByClassName("detectOnClick");
 const countdownButton = document.getElementById("countdownButton");
@@ -52,8 +52,6 @@ const createHandLandmarker = async () => {
         runningMode: runningMode,
         numHands: 2
     });
-
-    demosSection.classList.remove("invisible");
 };
 createHandLandmarker();
 
@@ -289,7 +287,7 @@ function animateEnemy(enemy) {
 
     const speed = 2 + Math.random() * 3;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
 
         const enemyY = parseInt(enemy.style.top);
 
@@ -300,6 +298,7 @@ function animateEnemy(enemy) {
 
             squareCount++;
             if (checkGameEnd()) {
+                await feedback();
                 clearInterval(spawnInterval);
             }
             return;
@@ -373,4 +372,27 @@ function checkGameEnd() {
         return true;
     }
     return false;
+}
+
+async function feedback () {
+    fetch(fetchUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: `My name is user and my score is ${score}` }),
+    }) .then(async response => { return response.json();
+    })  .then(async data => {
+        console.log('Input sent successfully:', data);
+        document.createElement('div').innerText = JSON.stringify(data);
+        let dataDiv = document.createElement('div');
+        dataDiv.innerHTML = JSON.stringify(data);
+        document.getElementById("responseDiv").appendChild(dataDiv);
+    })
+
+        .catch(error => {
+            console.error('Error sending input:', error);
+
+
+        });
 }
