@@ -150,7 +150,7 @@ async function predictWebcam() {
                 lineWidth: 1
             });
             drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 1 });
-            createHandPoseData(landmarks, "L");
+            createHandPoseData(landmarks, "Metal");
         }
     }
 
@@ -205,7 +205,7 @@ async function predictWebcam() {
         allPoseData.push(formattedData);
     }
 
-    if (allPoseData.length > 50) {
+    if (allPoseData.length > 1000) {
         saveAllPoseData();
     }
 
