@@ -325,8 +325,6 @@ function startSpawning() {
     }, randomInterval(3000, 10000));
 }
 
-
-
 function startCountdown() {
 
     score = 0;
@@ -392,7 +390,5 @@ async function feedback () {
 
         .catch(error => {
             console.error('Error sending input:', error);
-
-
         });
 }
